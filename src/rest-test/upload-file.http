@@ -1,0 +1,27 @@
+# login 
+
+POST http://127.0.0.1:25000/api/LoginJWT
+Content-Type: application/json
+
+{
+    "username": "demo",
+    "password": "demo123"
+}
+
+###
+# get workouts
+
+GET http://127.0.0.1:25000/api/summary-ef
+
+###
+# post file
+
+POST  http://127.0.0.1:25000/api/workout-file/047c2624-d836-477c-ace7-95380e6f1c10
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files"; filename="1.png"
+Content-Type: image/png
+
+< ./image.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
