@@ -28,15 +28,19 @@ public class WorkoutService : IWorkoutService
 
     public async Task<List<object>> GetSummaryEFAsync(Guid userGid)
     {
-        var query = await (_context.BikeWorkouts.Where(x=>x.WorkoutUser.Gid == userGid).GroupBy(x => new { x.WorkoutDate.Year, x.WorkoutDate.Month },
+        var query = await (_context.BikeWorkouts.Where(x=>x.WorkoutUser.Gid == userGid)
+            .GroupBy(x => new { x.WorkoutDate.Year, x.WorkoutDate.Month },
             (key, grp) => new
             {
                 PeriodYear = key.Year,
-                PeriodMonth = key.Month,
-                Sum = grp.Sum(x => x.DistanceKm),
+                PeriodMonth = key.Month, 
+                Sum = grp.Sum(x => x.DistanceKm), 
                 Count = grp.Count(),
                 SumTime = grp.Sum(x => x.TimeMinutes)
-            })).OrderByDescending(x => x.PeriodYear).OrderByDescending(x => x.PeriodMonth).ToListAsync();
+            })).OrderByDescending(x => x.PeriodYear)
+            .OrderByDescending(x=>x.PeriodYear)
+            .ThenByDescending(y=>y.PeriodMonth)
+            .ToListAsync();
 
         string FormatMonth(int x)
         {
@@ -47,10 +51,9 @@ public class WorkoutService : IWorkoutService
         var x = query.ToList().Select(x => new
         {
             Period = $"{x.PeriodYear}-" + FormatMonth(x.PeriodMonth),
-            Sum = $"{x.Sum} km",
-            Count = x.Count,
+            Sum = $"{x.Sum} km", Count = x.Count,
             Avg = $"{(decimal)x.Sum / (decimal)x.Count:0.00} km",
-            SumTime = $"{((decimal)x.SumTime / (decimal)60):0} hours"
+            SumTime = $"{((decimal)Math.Floor(((decimal)x.SumTime/(decimal)60))):0} hours {(x.SumTime % 60):00} minutes "
         });
 
         return x.ToList<object>();
