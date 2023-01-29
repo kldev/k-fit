@@ -16,6 +16,10 @@ services:
       Minio__Username: s3fit
       Minio__Password: s3fit123!
       ConnectionStrings__FitConn: "Server=fit-db;Port=5432;Database=fi;Username=fit;Password=fit123!" 
+      AppJwtConfig__Secret: "aNLc36vMyX!1E2FsX^z&@iVRZFx0rpa@"
+      AppJwtConfig__Issuer: 192.168.5.50
+      AppJwtConfig__CookieName: "fitdocker"
+      AppJwtConfig__CookieDomain: 192.168.5.50
     deploy:
       resources:
         limits:

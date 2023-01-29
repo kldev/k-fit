@@ -5,6 +5,7 @@ using K.Fit.Api.Service.AuthService;
 using K.Fit.Api.Service.AuthService.Requests;
 using K.Fit.Api.Service.UserIdentityService;
 using K.Fit.Api.Service.WorkoutService;
+using K.Fit.Api.Service.FileService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,10 @@ public class Program
             opt.UseNpgsql(builder.Configuration.GetConnectionString("FitConn"),
                 sqlOpt => { sqlOpt.MigrationsAssembly("K.Fit.Api"); }));
 
+        builder.Services.Configure<MinioConfig>(builder.Configuration.GetSection(MinioConfig.TAG_NAME));
+     
         builder.Services.AddScoped<IUserIdentityService, UserIdentityService>();
+        builder.Services.AddScoped<IFileService, FileService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IWorkoutService, WorkoutService>();
         builder.SetupJwt();
@@ -65,6 +69,21 @@ public class Program
         app.MapGet("/api/summary-ef", 
             (IWorkoutService service, IUserIdentityService identityService ) => service.GetSummaryEFAsync(identityService.AuthenticatedUser().Gid)
             ).WithName("Get EF Summary").RequireAuthorization();
+
+        app.Map("/", () => "K");
+
+        app.MapPost("/api/workout-file/{gid:guid}", async (HttpContext context, FitContext db, IFileService fileService) =>
+        {
+            var form = context.Request.Form;
+            if (form.Files.Count == 1)
+            {            
+                var result = await fileService.UploadFileAsync(Guid.NewGuid().ToString("N"), form.Files[0]);
+
+                return result;
+            }
+            return "Not files uploaded";
+        }).WithName("Upload workout file").RequireAuthorization();
+
 
         await app.RunAsync();
     }
